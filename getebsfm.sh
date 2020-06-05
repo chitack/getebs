@@ -27,7 +27,7 @@ fi
 MP3_FILE_NAME=$PROGRAM_NAME"_"$REC_DATE.mp3
 FILENAME=${PROGRAM_NAME}"_"`date +%Y%m%d`*.mp3
 
-if [[ -n $(find /home/pi -maxdepth 1 -type f -name "${FILENAME}") ]]
+if [[ -n $(find $HOME -maxdepth 1 -type f -name "${FILENAME}") ]]
 then
     echo "same file ${FILENAME}"
     #/usr/local/bin/telegram-send "Skip to resend"
@@ -40,4 +40,4 @@ else
     #https://pypi.org/project/telegram-send/#installation
     /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
 fi
-find /home/pi -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
+find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
