@@ -27,6 +27,11 @@ fi
 MP3_FILE_NAME=$PROGRAM_NAME"_"$REC_DATE.mp3
 FILENAME=${PROGRAM_NAME}"_"`date +%Y%m%d`*.mp3
 
+SavedIFS="$IFS"
+IFS=":."
+Time=($RECORD_MINS)
+Seconds=$(( ${Time[0]}*60 + ${Time[1]}))
+IFS="$SavedIFS"
 if [[ -n $(find $HOME -maxdepth 1 -type f -name "${FILENAME}") ]]
 then
     echo "same file ${FILENAME}"
@@ -34,10 +39,19 @@ then
 else
     echo "no file"
     ffmpeg -t $RECORD_MINS -y -i $RADIO_ADDR $MP3_FILE_NAME &>/dev/null
+    echo "try to send file $MP3_FILE_NAME"
+    if [ -f "$MP3_FILE_NAME" ]; then
+        FILESIZE=$(stat -c%s "$MP3_FILE_NAME")
+        echo "$MP3_FILE_NAME is $FILESIZE bytes"
 
-    #mkdir -p $DEST_DIR
-    #mv $MP3_FILE_NAME $DEST_DIR
-    #https://pypi.org/project/telegram-send/#installation
-    /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
+        if (( $FILESIZE < $(( $Seconds * 15000)) )) ; then
+            echo "too small, try to delete for next recording $FILESIZE < $(( $Seconds * 15000))"
+            rm -rf "$MP3_FILE_NAME"
+        else
+            /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME" --timeout 60.0
+        fi
+    else
+        echo "can not record the file($MP3_FILE_NAME)"
+    fi
 fi
 find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
