@@ -8,3 +8,5 @@ sudo pip3 install telegram-send
 chmod +x getebsfm.sh
 ln -sf $PWD/getebsfm.sh $HOME
 sudo timedatectl set-timezone Asia/Seoul
+touch $HOME/EBSRecoding_cron.log
+telegram-send --configure
