@@ -39,5 +39,18 @@ else
     #mv $MP3_FILE_NAME $DEST_DIR
     #https://pypi.org/project/telegram-send/#installation
     /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
+    if [[ $PROGRAM_NAME == *"Dial"* ]]; then
+        echo "dialogue"
+	. $HOME/inaSpeechSegEnv/bin/activate
+	python getclip.py -i "$MP3_FILE_NAME"
+    fi
 fi
 find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
+RECDATEONLY=`date +%Y%m%d`
+AA=`ls *"$RECDATEONLY"* | wc -c`
+echo $AA
+if (( $AA >=3 )); then
+	echo "enough today. turn off"
+else
+	echo "not enough wait more"
+fi
