@@ -24,9 +24,10 @@ def getclips(media):
     for i in timestamp:
         print(int(i))
 
-    print("ffmpeg -ss %d -i %s -to %d %s" % ( timestamp[0], media, int(timestamp[1]-timestamp[0])+1, media.replace(".mp3","clip.mp3")))
-    os.system("ffmpeg -ss %d -i %s -to %d %s" % ( timestamp[0], media, int(timestamp[1]-timestamp[0])+1, media.replace(".mp3","clip.mp3")))
-    os.system("/usr/local/bin/telegram-send --caption %s --file %s" % ( datetime.datetime.now().strftime("%Y%m%d"), media.replace(".mp3","clip.mp3")) )
+    newname = "%s.mp3" %  ( datetime.datetime.now().strftime("%Y%m%d") )
+    print("ffmpeg -ss %d -i %s -to %d %s" % ( timestamp[0], media, int(timestamp[1]-timestamp[0])+1, newname))
+    os.system("ffmpeg -ss %d -i %s -to %d %s" % ( timestamp[0], media, int(timestamp[1]-timestamp[0])+1, newname))
+    os.system("/usr/local/bin/telegram-send --caption %s --file %s" % ( datetime.datetime.now().strftime("%Y%m%d"), newname))
 
 
 import argparse
