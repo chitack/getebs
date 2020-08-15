@@ -12,6 +12,7 @@ ln -sf $PWD/getclip.py $HOME
 sudo timedatectl set-timezone Asia/Seoul
 touch $HOME/EBSRecoding_cron.log
 telegram-send --configure
+virtualenv -p python3 inaSpeechSegEnv
 echo source inaSpeechSegEnv/bin/activate
 echo pip install tensorflow-gpu
 echo pip install tensorflow
