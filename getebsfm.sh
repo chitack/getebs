@@ -27,6 +27,12 @@ fi
 MP3_FILE_NAME=$PROGRAM_NAME"_"$REC_DATE.mp3
 FILENAME=${PROGRAM_NAME}"_"`date +%Y%m%d`*.mp3
 
+SavedIFS="$IFS"
+IFS=":."
+Time=($RECORD_MINS)
+Seconds=$(( ${Time[0]}*60 + ${Time[1]}))
+IFS="$SavedIFS"
+
 if [[ -n $(find $HOME -maxdepth 1 -type f -name "${FILENAME}") ]]
 then
     echo "same file ${FILENAME}"
@@ -34,17 +40,30 @@ then
 else
     echo "no file"
     ffmpeg -t $RECORD_MINS -y -i $RADIO_ADDR $MP3_FILE_NAME &>/dev/null
+    echo "try to send file $MP3_FILE_NAME"
 
-    #mkdir -p $DEST_DIR
-    #mv $MP3_FILE_NAME $DEST_DIR
-    #https://pypi.org/project/telegram-send/#installation
-    if [[ $PROGRAM_NAME == *"Dial"* ]]; then
-        echo "dialogue"
-	. $HOME/inaSpeechSegEnv/bin/activate
-	python getclip.py -i "$MP3_FILE_NAME"
+    if [ -f "$MP3_FILE_NAME" ]; then
+        FILESIZE=$(stat -c%s "$MP3_FILE_NAME")
+        echo "$MP3_FILE_NAME is $FILESIZE bytes"
+        if (( $FILESIZE < $(( $Seconds * 15000)) )) ; then
+            echo "too small, try to delete for next recording $FILESIZE"
+	    /usr/local/bin/telegram-send "too small, try to delete for next recording $FILESIZE"
+            rm -rf "$MP3_FILE_NAME"
+        else
+            #time /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME" --timeout 120.0
+            /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
+            if [[ $PROGRAM_NAME == *"Power"* ]]; then
+	        DIAL_MP3_FILE_NAME=$PROGRAM_NAME"Dialogue_"$REC_DATE.mp3
+                ffmpeg -ss 2:30 -i $MP3_FILE_NAME -to 3:00 $DIAL_MP3_FILE_NAME
+                . $HOME/getebs/inaSpeechSegEnv/bin/activate
+                python getclip.py -i $DIAL_MP3_FILE_NAME
+            fi
+        fi
     else
-        /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
+        echo "can not record the file($MP3_FILE_NAME)"
+	/usr/local/bin/telegram-send "can not record the file($MP3_FILE_NAME)"
     fi
+
 fi
 find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
 RECDATEONLY=`date +%Y%m%d` 
