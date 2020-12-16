@@ -18,3 +18,4 @@ echo source inaSpeechSegEnv/bin/activate
 echo pip install tensorflow-gpu
 echo pip install tensorflow
 echo pip install inaSpeechSegmenter
+echo reset required
