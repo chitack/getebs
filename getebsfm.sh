@@ -54,7 +54,7 @@ else
             /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
             if [[ $PROGRAM_NAME == *"Power"* ]]; then
 	        DIAL_MP3_FILE_NAME=$PROGRAM_NAME"Dialogue_"$REC_DATE.mp3
-                ffmpeg -ss 2:30 -i $MP3_FILE_NAME -to 3:00 $DIAL_MP3_FILE_NAME
+                ffmpeg -ss 2:10 -i $MP3_FILE_NAME -to 3:00 $DIAL_MP3_FILE_NAME
                 . $HOME/getebs/inaSpeechSegEnv/bin/activate
                 python getclip.py -i $DIAL_MP3_FILE_NAME
             fi
