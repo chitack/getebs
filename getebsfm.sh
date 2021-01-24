@@ -32,6 +32,7 @@ IFS=":."
 Time=($RECORD_MINS)
 Seconds=$(( ${Time[0]}*60 + ${Time[1]}))
 IFS="$SavedIFS"
+
 if [[ -n $(find $HOME -maxdepth 1 -type f -name "${FILENAME}") ]]
 then
     echo "same file ${FILENAME}"
@@ -40,18 +41,38 @@ else
     echo "no file"
     ffmpeg -t $RECORD_MINS -y -i $RADIO_ADDR $MP3_FILE_NAME &>/dev/null
     echo "try to send file $MP3_FILE_NAME"
+
     if [ -f "$MP3_FILE_NAME" ]; then
         FILESIZE=$(stat -c%s "$MP3_FILE_NAME")
         echo "$MP3_FILE_NAME is $FILESIZE bytes"
-
         if (( $FILESIZE < $(( $Seconds * 15000)) )) ; then
-            echo "too small, try to delete for next recording $FILESIZE < $(( $Seconds * 15000))"
+            echo "too small, try to delete for next recording $FILESIZE"
+	    /usr/local/bin/telegram-send "too small, try to delete for next recording $FILESIZE"
             rm -rf "$MP3_FILE_NAME"
         else
-            /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME" --timeout 60.0
+            #time /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME" --timeout 120.0
+            /usr/local/bin/telegram-send --caption "$3" --file "$MP3_FILE_NAME"
+            if [[ $PROGRAM_NAME == *"Power"* ]]; then
+	        DIAL_MP3_FILE_NAME=$PROGRAM_NAME"Dialogue_"$REC_DATE.mp3
+                ffmpeg -ss 2:10 -i $MP3_FILE_NAME -to 3:00 $DIAL_MP3_FILE_NAME
+                . $HOME/getebs/inaSpeechSegEnv/bin/activate
+                python getclip.py -i $DIAL_MP3_FILE_NAME
+            fi
         fi
     else
         echo "can not record the file($MP3_FILE_NAME)"
+	/usr/local/bin/telegram-send "can not record the file($MP3_FILE_NAME)"
     fi
+
 fi
 find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
+RECDATEONLY=`date +%Y%m%d` 
+TOTALMP3SIZE=`du -chb  *"$RECDATEONLY"* | grep total | awk '{print $1}'`
+echo $TOTALMP3SIZE
+if (( $TOTALMP3SIZE >= 37000000 )); then
+        echo "enough size, turn off"
+        /usr/local/bin/telegram-send "enough size, turn off"
+        sudo shutdown -P +1
+else
+        echo "not enough wait more"
+fi
