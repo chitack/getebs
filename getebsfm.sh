@@ -55,7 +55,11 @@ else
             if [[ $PROGRAM_NAME == *"Power"* ]]; then
 	        DIAL_MP3_FILE_NAME=$PROGRAM_NAME"Dialogue_"$REC_DATE.mp3
                 ffmpeg -ss 2:10 -i $MP3_FILE_NAME -to 3:00 $DIAL_MP3_FILE_NAME
-                . $HOME/getebs/inaSpeechSegEnv/bin/activate
+                if [ -f $HOME/getebs/inaSpeechSegEnv/bin/activate ]; then
+		    . $HOME/getebs/inaSpeechSegEnv/bin/activate
+		elif [ -f $HOME/inaSpeechSegEnv/bin/activate ]; then
+		    . $HOME/inaSpeechSegEnv/bin/activate
+		fi
                 python getclip.py -i $DIAL_MP3_FILE_NAME
             fi
         fi
