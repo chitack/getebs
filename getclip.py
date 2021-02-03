@@ -16,6 +16,7 @@ def getclips(media):
             print(i)
             if len(timestamp) :
                 timestamp[1] = i[2]
+                break
             else:   
                 timestamp.append(i[1])
                 timestamp.append(i[2])
@@ -26,8 +27,8 @@ def getclips(media):
 
     newname = "%s.mp3" %  ( datetime.datetime.now().strftime("%Y%m%d") )
     #print("ffmpeg -ss %d -i %s -to %d %s" % ( timestamp[0], media, int(timestamp[1]-timestamp[0])+1, newname))
-    print("ffmpeg -ss %f -i %s -to %f %s" % ( timestamp[0], media, timestamp[1]-timestamp[0], newname))
-    os.system("ffmpeg -ss %f -i %s -to %f %s" % ( timestamp[0], media, (timestamp[1]-timestamp[0]), newname))
+    print("ffmpeg -ss %f -i %s -to %f %s -y " % ( timestamp[0], media, timestamp[1]-timestamp[0], newname))
+    os.system("ffmpeg -ss %f -i %s -to %f %s -y" % ( timestamp[0], media, (timestamp[1]-timestamp[0]), newname))
     os.system("/usr/local/bin/telegram-send --caption %s --file %s" % ( datetime.datetime.now().strftime("%Y%m%d"), newname))
 
 
