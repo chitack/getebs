@@ -37,6 +37,6 @@ parser = argparse.ArgumentParser(description='Process clip')
 parser.add_argument('-i', '--input', help='Input media to analyse', required=True)
 args = parser.parse_args()
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     getclips(args.input)
 
