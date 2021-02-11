@@ -71,7 +71,7 @@ else
 fi
 find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
 RECDATEONLY=`date +%Y%m%d` 
-TOTALMP3SIZE=`du -chb  *"$RECDATEONLY"* | grep total | awk '{print $1}'`
+TOTALMP3SIZE=`du -chb --exclude=*Chinese*.mp3 *"$RECDATEONLY"* | grep total | awk '{print $1}'`
 echo $TOTALMP3SIZE
 if (( $TOTALMP3SIZE >= 37000000 )); then
         echo "enough size, turn off"
