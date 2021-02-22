@@ -18,10 +18,11 @@ RECORD_MINS=$2
 #DEST_DIR=$3
 
 HOUR=$((`date +%H`))
+REC_DATE=`date +%Y%m%d-%H%M`
 if (( $HOUR >= 6 )); then
-    REC_DATE=`date +%Y%m%d-%H%M`
-else
+  if [[ $4 == *"bandi"* ]]; then
     REC_DATE=`date --date="-1 day" +%Y%m%d-%H%M`
+  fi
 fi
 
 MP3_FILE_NAME=$PROGRAM_NAME"_"$REC_DATE.mp3
@@ -71,9 +72,10 @@ else
 fi
 find $HOME -maxdepth 1 -type f -mtime +50 -name "$PROGRAM_NAME*" -exec rm -rf {} \;
 RECDATEONLY=`date +%Y%m%d` 
-TOTALMP3SIZE=`du -chb --exclude=*Chinese*.mp3 *"$RECDATEONLY"* | grep total | awk '{print $1}'`
-echo $TOTALMP3SIZE
-if (( $TOTALMP3SIZE >= 37000000 )); then
+TOTALMP3SIZE=`du -chb *"$RECDATEONLY"* | grep total | awk '{print $1}'`
+TOTALMP3COUNT=`ls *"$RECDATEONLY"* |  wc | awk '{print $1}'`
+echo $TOTALMP3SIZE, $TOTALMP3COUNT
+if (( $TOTALMP3SIZE >= 55000000 && $TOTALMP3COUNT >= 5 )); then
         echo "enough size, turn off"
         /usr/local/bin/telegram-send "enough size, turn off"
         sudo shutdown -P +1
