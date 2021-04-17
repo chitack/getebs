@@ -9,19 +9,24 @@ import os,datetime
 def getclips(media):
     seg = Segmenter()
     segmentation = seg(media)
-    print(segmentation)
+    print("all seg", segmentation)
     timestamp = []
     for i in segmentation:
         if i[0] == 'music':
-            print(i)
+            print("find out! music", i)
             if len(timestamp) :
+                if i[2] - timestamp[0] < 35:
+                    print("Too short, wait more", i[2], timestamp[0], i[2] - timestamp[0])
+                    continue
+                elif i[2] - timestamp[0] > 55 :
+                    print("Too long")
+                    break
                 timestamp[1] = i[2]
-                break
-            else:   
+            else:
                 timestamp.append(i[1])
                 timestamp.append(i[2])
-    
-    print(timestamp)
+
+    print("music" , timestamp)
     for i in timestamp:
         print(int(i))
 
