@@ -7,35 +7,30 @@ import os,datetime
 #media = '/home/abat/pyAudioAnalysis/powerenglish/PowerEnglishDialogue_20200804-0743.mp3'
 
 def getclips(media):
+    newname = "%d_%s.mp3" %  ( datetime.datetime.now().weekday(), datetime.datetime.now().strftime("%Y%m%d") )
     seg = Segmenter()
     segmentation = seg(media)
     print("all seg", segmentation)
+    mm = [ i for i in segmentation if i[0] == 'music']
+    for i in mm: print(i)
     timestamp = []
-    for i in segmentation:
-        if i[0] == 'music':
-            print("find out! music", i)
-            if len(timestamp) :
-                if i[2] - timestamp[0] < 35:
-                    print("Too short, wait more", i[2], timestamp[0], i[2] - timestamp[0])
-                    continue
-                elif i[2] - timestamp[0] > 55 :
-                    print("Too long")
-                    break
-                timestamp[1] = i[2]
-            else:
-                timestamp.append(i[1])
-                timestamp.append(i[2])
+    for i in range(0, len(mm)-1):
+        start = mm[i][1]
+        end = mm[i+1][2]
+        lengtha = mm[i+1][1] - mm[i][2]
+        if lengtha < 30: # less than 30 sec
+            print("Too short, wait more", lengtha)
+            continue
+        elif lengtha > 55 : # over than 55 sec
+            print("Too long?")
+            continue
+        print("%d-%f~%f:%f " % (i, start, end, lengtha))
 
-    print("music" , timestamp)
-    for i in timestamp:
-        print(int(i))
+        print("ffmpeg -ss %f -i %s -to %f %s -y " % ( start, media, end-start, newname))
+        os.system("ffmpeg -ss %f -i %s -to %f %s -y" % ( start, media, (end-start), newname))
+        os.system("/usr/local/bin/telegram-send --caption %d_%s --file %s" % ( datetime.datetime.now().weekday(), datetime.datetime.now().strftime("%Y%m%d"), newname))
 
-    newname = "%s.mp3" %  ( datetime.datetime.now().strftime("%Y%m%d") )
-    #print("ffmpeg -ss %d -i %s -to %d %s" % ( timestamp[0], media, int(timestamp[1]-timestamp[0])+1, newname))
-    print("ffmpeg -ss %f -i %s -to %f %s -y " % ( timestamp[0], media, timestamp[1]-timestamp[0], newname))
-    os.system("ffmpeg -ss %f -i %s -to %f %s -y" % ( timestamp[0], media, (timestamp[1]-timestamp[0]), newname))
-    os.system("/usr/local/bin/telegram-send --caption %s --file %s" % ( datetime.datetime.now().strftime("%Y%m%d"), newname))
-
+    return
 
 import argparse
 parser = argparse.ArgumentParser(description='Process clip')
