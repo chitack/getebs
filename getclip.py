@@ -17,7 +17,7 @@ def getclips(media):
     for i in range(0, len(mm)-1):
         start = mm[i][1]
         end = mm[i+1][2]
-        lengtha = mm[i+1][1] - mm[i][2]
+        lengtha = end - start
         if lengtha < 30: # less than 30 sec
             print("Too short, wait more", lengtha)
             continue
